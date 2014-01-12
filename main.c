@@ -8,7 +8,7 @@ int main()
     int sum=0;
     int position,position1,position2;
     int Lmax_index;
-    int *tchange,*mieux;
+    int *tchange,*mieux,*tempVoy;
     int j,k,index;
 	int visited[TACHE];
     info_tache=initial_infor_tache();
@@ -55,6 +55,8 @@ int main()
     printf("\n");
 
 	mieux=voyage;
+
+	//Swap_dans_voyage
 	do{
          Lmax_index=Lmax;
          voyage=mieux;
@@ -72,6 +74,7 @@ int main()
                         Lmax=Calcule_Lmax(tchange);
                         printf("%d",Lmax);
                         mieux=tchange;
+                        free()
                      }else{
                          free(tchange);
                          tchange=NULL;
@@ -80,55 +83,67 @@ int main()
             }
         }
 	}while(Lmax!=Lmax_index);
+	printf("Swap_dans_voyage:Lmax=%d",Lmax);
+	printf("\n");
 
-	printf("%d",Lmax);
+	//Swap_voyage
+	for(i=0;i<TACHE-1;i++){
+        for(position1=1;position1<=nbr_voy[i];position1++){
+         for(j=i+1;j<TACHE;j++){
+            for(position2=1;position2<=nbr_voy[j];position2++){
+                tchange=swap_voyage(i,j,position1,position2);
+                if(Lmax>Calcule_Lmax(tchange)){
+                        Lmax=Calcule_Lmax(tchange);
+                       // printf("%d",Lmax);
+                        mieux=tchange;
+                     }else{
+                         free(tchange);
+                         tchange=NULL;
+                     }
+            }
+        }
+        }
+    }
+    printf("Swap_voyage:Lmax=%d",Lmax);
+	printf("\n");
+
+	//Shift_voyage_droite
+   for(i=0;i<TACHE-1;i++){
+        for(position=1;position<=nbr_voy[i];position++){
+            tchange=shift_voyage_droite(i,position);
+            if(Lmax>Calcule_Lmax(tchange)){
+                        Lmax=Calcule_Lmax(tchange);
+                        printf("%d",Lmax);
+                        mieux=tchange;
+                     }else{
+                         free(tchange);
+                         tchange=NULL;
+                     }
+        }
+    }
+    printf("Shift_voyage_droite:Lmax=%d",Lmax);
+	printf("\n");
+
+	//Shift_voyage_left
+    for(i=1;i<TACHE;i++){
+        for(position=1;position<=nbr_voy[i];position++){
+            tchange=shift_voyage_left(i,position);
+            if(Lmax>Calcule_Lmax(tchange)){
+                        Lmax=Calcule_Lmax(tchange);
+                        printf("%d",Lmax);
+                        mieux=tchange;
+                     }else{
+                         free(tchange);
+                         tchange=NULL;
+                     }
+        }
+    }
+    printf("Shift_voyage_left:Lmax=%d",Lmax);
+	printf("\n");
 
     return 0;
 }
 
-/*   for(i=0;i<TACHE-1;i++){
-            for(position1=1;position1<=nbr_voy[i];position1++){
-             for(j=i+1;j<TACHE;j++){
-                for(position2=1;position2<=nbr_voy[j];position2++){
-                    tchange=swap_voyage(i,j,position1,position2);
-                    if(Lmax>Calcule_Lmax(tchange)){
-                            Lmax=Calcule_Lmax(tchange);
-                           // printf("%d",Lmax);
-                            mieux=tchange;
-                         }else{
-                             free(tchange);
-                             tchange=NULL;
-                         }
-                }
-            }
-            }
-        }*/
-       /* for(i=0;i<TACHE-1;i++){
-            for(position=1;position<=nbr_voy[i];position++){
-                tchange=shift_voyage_droite(i,position);
-                if(Lmax>Calcule_Lmax(tchange)){
-                            Lmax=Calcule_Lmax(tchange);
-                            printf("%d",Lmax);
-                            mieux=tchange;
-                         }else{
-                             free(tchange);
-                             tchange=NULL;
-                         }
-            }
-        }
-        for(i=1;i<TACHE;i++){
-            for(position=1;position<=nbr_voy[i];position++){
-                tchange=shift_voyage_left(i,position);
-                if(Lmax>Calcule_Lmax(tchange)){
-                            Lmax=Calcule_Lmax(tchange);
-                            printf("%d",Lmax);
-                            mieux=tchange;
-                         }else{
-                             free(tchange);
-                             tchange=NULL;
-                         }
-            }
-        }*/
 /*void initial_ordre(){
     int i=0,j,k,index;
 	int visited[TACHE];
@@ -159,7 +174,7 @@ void initial_voyage(){
 	int date_actu,site_actu;
 	int index_dernier_voyage,nbr_voyage;
 	int date_group,date_non_group;
-
+    memset(voyage,0,sizeof(int)*TACHE*2); //
 	//initialiser l'ordonnence par EDD
 	fin_ordre[0]=info_tache[0][ordre[0]];
     for(i=1;i<TACHE;i++){
@@ -367,10 +382,10 @@ int *shift_voyage_left(int val_voyage,int position){
     }
 
 	for(i=0;i<2*TACHE;i++)
-		temp[i]=voyage[i];
+			temp[i]=voyage[i];
 
 	for(i=0;i<val_voyage-1;i++)
-	  sum=sum+temp[sum]+1;
+				sum=sum+temp[sum]+1;
 	t=temp[sum+temp[sum]+1+position];
 	for(i=sum+temp[sum]+1+position;i>sum+temp[sum]+1;i--)
 		temp[i]=temp[i-1];
@@ -394,10 +409,10 @@ int *shift_voyage_droite(int val_voyage,int position){
 			temp[i]=voyage[i];
 
 	for(i=0;i<val_voyage;i++)
-			sum=sum+temp[sum]+1;
+				sum=sum+temp[sum]+1;
 	t=temp[sum+position];
 	for(i=sum+position;i<sum+temp[sum]+1;i++)
-		  temp[i]=temp[i+1];
+		temp[i]=temp[i+1];
 	temp[i]=t;
 	temp[i-1]++;
 	temp[sum]--;
@@ -414,12 +429,12 @@ void print_ordre(int *ordre){
 }
 
 void print_voyage(int *voyage){
+    int i;
     printf("voyage : ");
-    for(int i=0;i<2*TACHE;i++) //print voyage initial
+    for(i=0;i<2*TACHE;i++) //print voyage initial
         printf("%d ",voyage[i]);
     printf("\n");
 }
-
 void free_info_tache(int **info_tache){
     int i=0;
     for(;i<2;i++){
@@ -429,7 +444,6 @@ void free_info_tache(int **info_tache){
     free(info_tache);
     info_tache=NULL;
 }
-
 void free_info_site(int **info_site){
     int i=0;
     for(;i<TACHE;i++){
@@ -439,20 +453,21 @@ void free_info_site(int **info_site){
     free(info_site);
     info_site=NULL;
 }
-
 void free_ordre(int *ordre){
     if(ordre!= NULL){
         free(ordre);
         ordre=NULL;
     }
 }
-
 void free_voyage(int *voyage){
     if(voyage!= NULL){
         free(voyage);
         voyage=NULL;
     }
 }
+
+
+
 
 
 
