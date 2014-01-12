@@ -3,9 +3,9 @@
 #include "main.h"
 int main()
 {
-    int i;
+    int i,count;
     int *nbr_voy;
-    int sum=0;
+    int sum;
     int position,position1,position2;
     int Lmax_index;
     int *tchange,*mieux;
@@ -55,9 +55,11 @@ int main()
     printf("\n");
 
 	mieux=voyage;
-
+    count=1;
 
 	do{
+	    printf("************** Literation %d ***********\n",count);
+	     sum=0;
          Lmax_index=Lmax;
          voyage=mieux;
          nbr_voy[0]=voyage[0];
@@ -144,7 +146,7 @@ int main()
 
         free(voyage);
         voyage=NULL;
-
+        count++;
 	}while(Lmax!=Lmax_index);
 
 	printf("meilleur ");
