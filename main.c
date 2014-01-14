@@ -4,11 +4,11 @@
 int main()
 {
     int i,count;
-    int *nbr_voy;
+    int *nbr_voy=NULL;
     int sum;
     int position,position1,position2;
     int Lmax_index;
-    int *tchange,*mieux;
+    int *tchange=NULL,*mieux=NULL;
     int j,k,index;
 	int visited[TACHE];
     info_tache=initial_infor_tache();
@@ -58,10 +58,13 @@ int main()
     count=1;
 
 	do{
+	    printf("\n \n");
 	    printf("************** Literation %d ***********\n",count);
+	    print_ordre(ordre);
+	    print_voyage(voyage);
 	     sum=0;
          Lmax_index=Lmax;
-         voyage=mieux;
+         mieux=voyage;
          nbr_voy[0]=voyage[0];
 	     for(i=1;i<TACHE;i++){
 		   sum=sum+nbr_voy[i-1];
@@ -100,10 +103,12 @@ int main()
                             printf("Lmax=%d : ",Lmax);
                             mieux=tchange;
                             print_voyage(tchange);
+                            print_ordre(ordre);
                          }else{
                              print_voyage(tchange);
                              free(tchange);
                              tchange=NULL;
+                             print_ordre(ordre);
                          }
                 }
             }
@@ -113,8 +118,8 @@ int main()
         //Shift_voyage_droite
         printf("Shift_voyage_droite:\n");
        for(i=0;i<TACHE-1;i++){
-            for(position=1;position<=nbr_voy[i];position++){
-                tchange=shift_voyage_droite(i,position);
+           if(nbr_voy[i]!=0){
+                tchange=shift_voyage_droite(i);
                 if(Lmax>Calcule_Lmax(tchange)){
                             Lmax=Calcule_Lmax(tchange);
                             printf("Lmax=%d\ : ",Lmax);
@@ -125,32 +130,36 @@ int main()
                              free(tchange);
                              tchange=NULL;
                          }
-            }
         }
+       }
 
         //Shift_voyage_left
-        printf("Shift_voyage_left:\n");
+        printf("Shift_voyage_gauche:\n");
         for(i=1;i<TACHE;i++){
-            for(position=1;position<=nbr_voy[i];position++){
-                tchange=shift_voyage_left(i,position);
+            if(nbr_voy[i]!=0){
+                tchange=shift_voyage_gauche(i);
                 if(Lmax>Calcule_Lmax(tchange)){
                             Lmax=Calcule_Lmax(tchange);
                             printf("Lmax=%d : ",Lmax);
                             mieux=tchange;
+                            print_voyage(tchange);
                          }else{
+                             print_voyage(tchange);
                              free(tchange);
                              tchange=NULL;
                          }
-            }
+        }
         }
 
         free(voyage);
         voyage=NULL;
+        voyage=mieux;
         count++;
 	}while(Lmax!=Lmax_index);
-
+    printf("-------------------------------\n");
 	printf("meilleur ");
-	print_voyage(mieux);
+	//printf("%d",voyage[0]);
+	print_voyage(voyage);
 
     return 0;
 }
@@ -358,7 +367,7 @@ int * swap_dans_voyage(int val_voyage,int position1,int position2){
 
 int *swap_voyage(int val1_voyage,int val2_voyage,int position1,int position2){
 	int i,sum1=0,sum2=0;
-	int t;
+	int t,t_ordre;
 	int *temp;
     if((temp=(int *)malloc(2*TACHE*sizeof(int)))==NULL){
         printf("shift_voyage_droite temp malloc error.");
@@ -373,18 +382,18 @@ int *swap_voyage(int val1_voyage,int val2_voyage,int position1,int position2){
 	for(i=0;i<val2_voyage;i++)
 			sum2=sum2+voyage[sum2]+1;
 
-	if((position1>voyage[sum1])||(position2>voyage[sum2]))
-			return voyage;
-	else{
-			t=temp[sum1+position1];
-			temp[sum1+position1]=temp[sum2+position2];
-			temp[sum2+position2]=t;
-			return temp;
-		}
+    t=temp[sum1+position1];
+    temp[sum1+position1]=temp[sum2+position2];
+    temp[sum2+position2]=t;
+    t_ordre=ordre[sum1+position1-val1_voyage-1];
+    ordre[sum1+position1-val1_voyage-1]=ordre[sum2+position2-val2_voyage-1];
+    ordre[sum2+position2-val2_voyage-1]=t_ordre;
+    //print_ordre(ordre);
+    return temp;
 }
 
 
-int *shift_voyage_left(int val_voyage,int position){
+int *shift_voyage_gauche(int val_voyage){
 	int i,sum=0;
 	int t;
 	int *temp;
@@ -398,17 +407,21 @@ int *shift_voyage_left(int val_voyage,int position){
 
 	for(i=0;i<val_voyage-1;i++)
 				sum=sum+temp[sum]+1;
-	t=temp[sum+temp[sum]+1+position];
+	/*t=temp[sum+temp[sum]+1+position];
 	for(i=sum+temp[sum]+1+position;i>sum+temp[sum]+1;i--)
 		temp[i]=temp[i-1];
 	temp[i]=t;
 	temp[i+1]--;
-	temp[sum]++;
-
+	temp[sum]++;*/
+    t=temp[sum+temp[sum]+2];
+    temp[sum+temp[sum]+1]--;
+    temp[sum+temp[sum]+2]=temp[sum+temp[sum]+1];
+    temp[sum+temp[sum]+1]=t;
+    temp[sum]++;
 	return temp;
 }
 
-int *shift_voyage_droite(int val_voyage,int position){
+int *shift_voyage_droite(int val_voyage){
 	int i,sum=0;
 	int t;
 	int *temp;
@@ -422,14 +435,19 @@ int *shift_voyage_droite(int val_voyage,int position){
 
 	for(i=0;i<val_voyage;i++)
 				sum=sum+temp[sum]+1;
-	t=temp[sum+position];
-	for(i=sum+position;i<sum+temp[sum]+1;i++)
-		temp[i]=temp[i+1];
-	temp[i]=t;
-	temp[i-1]++;
-	temp[sum]--;
 
-	return temp;
+	//for(i=sum-1;i<sum+temp[sum]+1;i++)
+		//temp[i]=temp[i+1];
+
+	/*temp[i]=t;
+	temp[i-1]++;
+	temp[sum]--;*/
+        t=temp[sum+temp[sum]];
+        temp[sum+temp[sum]]=temp[sum+temp[sum]+1];
+        temp[sum+temp[sum]+1]=t;
+        temp[sum+temp[sum]]++;
+        temp[sum]--;
+        return temp;
 }
 
 void print_ordre(int *ordre){
